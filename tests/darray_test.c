@@ -32,9 +32,9 @@ void sigtrap_handler(int signum) {
 #include "../lib/darray.h"
 
 /******************************************************************************
- * *
- * Helper Data Structures & Functions                 *
- * *
+ *                                                                            *
+ *                     Helper Data Structures & Functions                     *
+ *                                                                            *
  ******************************************************************************/
 
 // Simple struct for testing complex data types
@@ -102,9 +102,9 @@ int int_cmp(const void* a, const void* b) {
 }
 
 /******************************************************************************
- * *
- * Test Functions                               *
- * *
+ *                                                                            *
+ *                               Test Functions                               *
+ *                                                                            *
  ******************************************************************************/
 
 // Utility to create a Person struct for testing
@@ -639,31 +639,6 @@ void test_functional_methods() {
     printf("Test Functional Methods done.\n\n");
 }
 // ---
-
-// The default copier/printer/deallocator functions are simple and mainly exist to cause a
-// SIGTRAP error for complex types without a user-defined copier.
-// Testing the SIGTRAP behavior requires platform-specific signal handling, which is usually
-// outside the scope of simple unit tests. A simple check for the default printer can be done.
-
-// void test_default_fns() {
-//     printf("--- Test Default Functions ---\n");
-//     // Test default printer (prints memory address)
-//     DArray_t* da = da_new(sizeof(int));
-//     da->copier = int_copier;
-
-//     int v = 10;
-//     da_push(da, &v);  // Push still fails without a copier being set first.
-//     // However, for testing, we can manually set length and print.
-//     da->length = 1;
-//     // We cannot reliably test the output of da_print/da_fprint for the default printer,
-//     // as it prints a memory address (<@0x...>), but we can check the default function is set.
-//     fprintf(stdout, "Default printer set, its output should look like '<@0x...>' next: ");
-//     da_print(da);
-//     fprintf(stdout, "\n");
-//     printf("Default printer executed.\n");
-//     da_free(da);
-//     printf("Test Default Functions done.\n\n");
-// }
 
 void test_default_fns() {
     printf("--- Test Default Functions (SIGTRAP Handling) ---\n");
