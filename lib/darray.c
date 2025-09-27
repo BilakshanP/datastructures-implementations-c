@@ -1,5 +1,3 @@
-#define DYNAMICARRAY_IMPL
-
 #include "darray.h"
 
 #include <signal.h>
@@ -924,5 +922,3 @@ static void __da_reverse(void* arr, size_t element_size, size_t start, size_t en
 
     free(buffer);
 }
-
-#undef DYNAMICARRAY_IMPL
