@@ -415,4 +415,41 @@ DArray* da_filter(const DArray* da, bool (*filter_fn)(const void* elem));
 /// @param reduce_fn Pointer to the reduction function: `reduce_fn(acc, elem)`.
 void da_reduce(const DArray* da, void* acc, void (*reduce_fn)(void* acc, const void* elem));
 
+/**
+ * @brief Dynamic Array Iterator Structure (Generic implementation)
+ *
+ * This structure encapsulates the state and of the iterator.
+ *
+ * @note CONTRACT: The use shall not manipulate the Array which is being iterated.
+ */
+typedef struct DynamicArrayIterator DAIterator;
+
+struct DynamicArrayIterator {
+    void* arr;            /// Pointer to the inner array of the `DArray`.
+    size_t index;         /// Index to the current element.
+    size_t length;        /// Length of the array.
+    size_t element_size;  /// Size of the elements.
+};
+
+/// @brief Creates and initializes a new iterator for the given dynamic array.
+/// @param da Pointer to the dynamic array to iterate over.
+/// @return Pointer to the newly allocated DAIterator, or NULL on allocation failure.
+DAIterator* da_iterator(DArray* da);
+
+/// @brief Advances the iterator to the next element.
+/// @details Increments the internal index.
+/// @param dai Pointer to the DAIterator.
+/// @return `true` if there is a next element, `false` otherwise (end of array).
+bool dai_next(DAIterator* dai);
+
+// @brief Retrieves a pointer to the current element in the iteration.
+// @details Returns a pointer to the element at `dai->index - 1`.
+// @param dai Pointer to the DAIterator.
+// @return Pointer to the current element, or NULL if the iterator is not yet advanced or has finished.
+void* dai_get(DAIterator* dai);
+
+/// @brief Frees the memory associated with the iterator structure.
+/// @param dai Pointer to the DAIterator to free.
+void dai_free(DAIterator* dai);
+
 #endif  // DYNAMICARRAY_H

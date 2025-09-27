@@ -774,6 +774,49 @@ void da_reduce(const DArray* da, void* acc, void (*reduce_fn)(void* acc, const v
 
 /******************************************************************************
  *                                                                            *
+ *                           Dynamic Array Iterator                           *
+ *                                                                            *
+ ******************************************************************************/
+
+DAIterator* da_iterator(DArray* da) {
+    if (!da) return NULL;
+
+    DAIterator* dai = (DAIterator*)malloc(sizeof(DAIterator));
+    if (!dai) return NULL;
+
+    dai->arr = da->arr;
+    dai->index = 0;
+    dai->length = da->length;
+    dai->element_size = da->element_size;
+
+    return dai;
+}
+
+bool dai_next(DAIterator* dai) {
+    if (!dai) return false;
+
+    if (dai->index < dai->length) {
+        dai->index++;
+        return true;
+    }
+
+    return false;
+}
+
+void* dai_get(DAIterator* dai) {
+    if (!dai || dai->index == 0 || dai->index > dai->length) return NULL;
+
+    size_t current_idx = dai->index - 1;
+
+    return (char*)dai->arr + (current_idx * dai->element_size);
+}
+
+void dai_free(DAIterator* dai) {
+    if (dai) free(dai);
+}
+
+/******************************************************************************
+ *                                                                            *
  *                       Inner Functions Implementation                       *
  *                                                                            *
  ******************************************************************************/
