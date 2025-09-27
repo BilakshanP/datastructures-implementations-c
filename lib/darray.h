@@ -242,7 +242,7 @@ bool da_contains_bsearch(const DArray* da, const void* target, int (*cmp)(const 
 /// @param a Pointer to the dynamic array.
 /// @param b Pointer to the dynamic array.
 /// @return `true` if equal, `false` otherwise (including on error).
-bool da_are_eq(const DArray* a, const DArray* b);
+bool da_are_eq(const DArray* a, const DArray* b, int (*cmp)(const void* a, const void* b));
 
 /******************************************************************************
  *                                                                            *

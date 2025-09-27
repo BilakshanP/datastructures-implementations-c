@@ -366,7 +366,7 @@ bool da_contains_bsearch(const DArray* da, const void* target, int (*cmp)(const 
  *                                                                            *
  ******************************************************************************/
 
-bool da_are_eq(const DArray* a, const DArray* b) {
+bool da_are_eq(const DArray* a, const DArray* b, int (*cmp)(const void* a, const void* b)) {
     if (a == b) return true;
 
     if (!a) return false;
@@ -375,7 +375,7 @@ bool da_are_eq(const DArray* a, const DArray* b) {
     if (a->element_size != b->element_size) return false;
     if (a->length != b->length) return false;
 
-    for (int i = 0; i < a->length; i++) {
+    for (size_t i = 0; i < a->length; i++) {
         const void* ai = __da_index_raw(a, i);
         const void* bi = __da_index_raw(b, i);
 
