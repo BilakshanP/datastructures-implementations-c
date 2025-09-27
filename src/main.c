@@ -38,5 +38,5 @@ int main() {
     da_shrink(filtered);
 
     da_print(filtered);
-    printf("%d %d \n", filtered->length, filtered->capacity);
+    printf("%ld %ld \n", filtered->length, filtered->capacity);
 }
