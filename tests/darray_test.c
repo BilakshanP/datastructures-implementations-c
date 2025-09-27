@@ -1,3 +1,5 @@
+#include "../lib/darray.h"
+
 #include <assert.h>
 #include <setjmp.h>  // For non-local jump (longjmp)
 #include <signal.h>  // For testing SIGTRAP
@@ -7,9 +9,9 @@
 #include <string.h>
 
 /******************************************************************************
- * *
- * SIGTRAP Handling Globals                           *
- * *
+ *                                                                            *
+ *                          SIGTRAP Handling Globals                          *
+ *                                                                            *
  ******************************************************************************/
 
 // Flag set by the signal handler
@@ -28,8 +30,6 @@ void sigtrap_handler(int signum) {
         longjmp(env, 1);  // Return control to the main test execution
     }
 }
-
-#include "../lib/darray.h"
 
 /******************************************************************************
  *                                                                            *
