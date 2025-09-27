@@ -14,7 +14,7 @@ int cmp(const void* a, const void* b) { return *(int*)a - *(int*)b; }
 bool even_filter(const void* k) { return (*(int*)k) % 2 == 0; }
 
 int main() {
-    DArray_t* da = da_new(sizeof(int));
+    DArray* da = da_new(sizeof(int));
 
     da->growth_factor = 10;
 
@@ -32,7 +32,7 @@ int main() {
     da_print(da);
     printf("\n");
 
-    DArray_t* filtered = da_filter(da, even_filter);
+    DArray* filtered = da_filter(da, even_filter);
 
     da_reverse(filtered);
     da_shrink(filtered);

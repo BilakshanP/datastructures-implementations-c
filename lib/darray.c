@@ -41,32 +41,32 @@ inline static void __da_default_printer(const void* k);
 /// @param da Pointer to the dynamic array.
 /// @param idx The index of the element.
 /// @return A constant pointer to the memory location of the element.
-inline static const void* __da_index_raw(const DArray_t* da, size_t idx);
+inline static const void* __da_index_raw(const DArray* da, size_t idx);
 
 /// @brief Copies an element into the array at the specified index using the configured copier.
 /// @details A wrapper around `da->copier` that calculates the destination address. This function does **not** check bounds or update the array length.
 /// @param da Pointer to the dynamic array.
 /// @param idx The index where the element should be placed.
 /// @param e Pointer to the source element data.
-inline static void __da_set_raw(DArray_t* da, size_t idx, const void* e);
+inline static void __da_set_raw(DArray* da, size_t idx, const void* e);
 
 /// @brief Checks if reallocation is necessary and performs an upsizing (growth).
 /// @details If `da->length == da->capacity`, it calculates a new capacity using `da->growth_factor` (minimum capacity of 1 if current is 0) and calls `da_reserve`.
 /// @param da Pointer to the dynamic array.
 /// @return `true` if the capacity is sufficient or resize succeeded, `false` on allocation failure.
-inline static bool __da_upsize(DArray_t* da);
+inline static bool __da_upsize(DArray* da);
 
 /// @brief Checks if reallocation is necessary and performs a downsizing (shrink).
 /// @details If `da->length` is less than `da->capacity * da->shrink_factor`, it calls `da_shrink` to resize the array to fit the current length.
 /// @param da Pointer to the dynamic array.
-inline static void __da_downsize(DArray_t* da);
+inline static void __da_downsize(DArray* da);
 
 /// @brief Shifts a block of elements within the array using `memmove`.
 /// @details Used for insertion (`dest_idx > src_idx`) or removal (`dest_idx < src_idx`).
 /// @param da Pointer to the dynamic array.
 /// @param dest_idx The starting index of the destination.
 /// @param src_idx The starting index of the source. The number of elements shifted is from `src_idx` to `da->length - 1`.
-inline static void __da_shift(DArray_t* da, size_t dest_idx, size_t src_idx);
+inline static void __da_shift(DArray* da, size_t dest_idx, size_t src_idx);
 
 /// @brief Swaps two elements in a raw array using a temporary buffer.
 /// @param arr Pointer to the raw array memory.
@@ -90,12 +90,12 @@ static void __da_reverse(void* arr, size_t element_size, size_t start, size_t en
  *                                                                            *
  ******************************************************************************/
 
-DArray_t* da_new(const size_t element_size) {
+DArray* da_new(const size_t element_size) {
     return da_new_with_capacity(element_size, 4);
 }
 
-DArray_t* da_new_with_capacity(const size_t element_size, const size_t capacity) {
-    DArray_t* da = malloc(sizeof(DArray_t));
+DArray* da_new_with_capacity(const size_t element_size, const size_t capacity) {
+    DArray* da = malloc(sizeof(DArray));
     if (!da) return NULL;
 
     da->arr = malloc(capacity * element_size);
@@ -118,8 +118,8 @@ DArray_t* da_new_with_capacity(const size_t element_size, const size_t capacity)
     return da;
 }
 
-DArray_t* da_new_from_array(const size_t element_size, const size_t length, const void* arr, void (*copier)(void* dest, const void* src)) {
-    DArray_t* da = da_new_with_capacity(element_size, length);
+DArray* da_new_from_array(const size_t element_size, const size_t length, const void* arr, void (*copier)(void* dest, const void* src)) {
+    DArray* da = da_new_with_capacity(element_size, length);
     if (!da) return NULL;
 
     da->copier = copier;
@@ -140,10 +140,10 @@ DArray_t* da_new_from_array(const size_t element_size, const size_t length, cons
  *                                                                            *
  ******************************************************************************/
 
-DArray_t* da_copy(const DArray_t* da) {
+DArray* da_copy(const DArray* da) {
     if (!da) return NULL;
 
-    DArray_t* copied = da_new_with_capacity(da->element_size, da->length);
+    DArray* copied = da_new_with_capacity(da->element_size, da->length);
     if (!copied) return NULL;
 
     for (size_t i = 0; i < da->length; i++) {
@@ -163,14 +163,14 @@ DArray_t* da_copy(const DArray_t* da) {
     return copied;
 }
 
-void da_free(DArray_t* da) {
+void da_free(DArray* da) {
     if (!da_clear(da)) return;
 
     free(da->arr);
     free(da);
 }
 
-bool da_clear(DArray_t* da) {
+bool da_clear(DArray* da) {
     if (!da) return false;
 
     if (da->deallocator) {
@@ -191,21 +191,21 @@ bool da_clear(DArray_t* da) {
  *                                                                            *
  ******************************************************************************/
 
-inline size_t da_length(const DArray_t* da) {
+inline size_t da_length(const DArray* da) {
     return da->length;
 }
 
-inline size_t da_capacity(const DArray_t* da) {
+inline size_t da_capacity(const DArray* da) {
     return da->capacity;
 }
 
-inline bool da_is_empty(const DArray_t* da) {
+inline bool da_is_empty(const DArray* da) {
     if (!da) return true;
 
     return da->length == 0;
 }
 
-inline void* da_index(DArray_t* da, size_t idx) {
+inline void* da_index(DArray* da, size_t idx) {
     return (void*)__da_index_raw(da, idx);
 }
 
@@ -215,11 +215,11 @@ inline void* da_index(DArray_t* da, size_t idx) {
  *                                                                            *
  ******************************************************************************/
 
-void da_print(const DArray_t* da) {
+void da_print(const DArray* da) {
     da_fprint(da, stdout);
 }
 
-void da_fprint(const DArray_t* da, FILE* file) {
+void da_fprint(const DArray* da, FILE* file) {
     if (!da) {
         printf("[NULLPTR]");
         return;
@@ -246,13 +246,13 @@ void da_fprint(const DArray_t* da, FILE* file) {
  *                                                                            *
  ******************************************************************************/
 
-void* da_raw(DArray_t* da) {
+void* da_raw(DArray* da) {
     if (!da) return NULL;
 
     return da->arr;
 }
 
-void* da_get_raw(DArray_t* da) {
+void* da_get_raw(DArray* da) {
     void* arr = da->arr;
 
     free(da);
@@ -260,7 +260,7 @@ void* da_get_raw(DArray_t* da) {
     return arr;
 }
 
-void* da_get_arr(const DArray_t* da) {
+void* da_get_arr(const DArray* da) {
     if (!da) return NULL;
 
     void* arr = malloc(da->element_size * da->length);
@@ -275,11 +275,11 @@ void* da_get_arr(const DArray_t* da) {
     return arr;
 }
 
-DArray_t* da_get_subarr(const DArray_t* da, size_t start, size_t end) {
+DArray* da_get_subarr(const DArray* da, size_t start, size_t end) {
     if (!da || start > end || end > da->length) return NULL;
 
     const size_t sub_len = end - start;
-    DArray_t* sub = da_new_with_capacity(da->element_size, sub_len);
+    DArray* sub = da_new_with_capacity(da->element_size, sub_len);
     if (!sub) return NULL;
 
     for (size_t i = 0; i < sub_len; i++) {
@@ -293,17 +293,17 @@ DArray_t* da_get_subarr(const DArray_t* da, size_t start, size_t end) {
     return sub;
 }
 
-void* da_get(DArray_t* da, size_t idx) {
+void* da_get(DArray* da, size_t idx) {
     if (!da || idx >= da->length) return NULL;
 
     return da_index(da, idx);
 }
 
-void* da_get_first(DArray_t* da) {
+void* da_get_first(DArray* da) {
     return da_get(da, 0);
 }
 
-void* da_get_last(DArray_t* da) {
+void* da_get_last(DArray* da) {
     if (!da || da_is_empty(da)) return NULL;
 
     return da_get(da, da->length - 1);
@@ -315,7 +315,7 @@ void* da_get_last(DArray_t* da) {
  *                                                                            *
  ******************************************************************************/
 
-size_t da_find(const DArray_t* da, const void* target, int (*cmp)(const void* a, const void* b)) {
+size_t da_find(const DArray* da, const void* target, int (*cmp)(const void* a, const void* b)) {
     if (!da || !target || !cmp) return (size_t)-1;
 
     for (size_t i = 0; i < da->length; i++) {
@@ -329,7 +329,7 @@ size_t da_find(const DArray_t* da, const void* target, int (*cmp)(const void* a,
     return (size_t)-1;
 }
 
-size_t da_binary_search(const DArray_t* da, const void* target, int (*cmp)(const void* a, const void* b)) {
+size_t da_binary_search(const DArray* da, const void* target, int (*cmp)(const void* a, const void* b)) {
     if (!da || !target || !cmp) return (size_t)-1;
 
     size_t low = 0;
@@ -352,11 +352,11 @@ size_t da_binary_search(const DArray_t* da, const void* target, int (*cmp)(const
     return (size_t)-1;
 }
 
-bool da_contains(const DArray_t* da, const void* target, int (*cmp)(const void* a, const void* b)) {
+bool da_contains(const DArray* da, const void* target, int (*cmp)(const void* a, const void* b)) {
     return da_find(da, target, cmp) != (size_t)-1;
 }
 
-bool da_contains_bsearch(const DArray_t* da, const void* target, int (*cmp)(const void* a, const void* b)) {
+bool da_contains_bsearch(const DArray* da, const void* target, int (*cmp)(const void* a, const void* b)) {
     if (!da | !target) return false;
 
     return bsearch(target, da->arr, da->length, da->element_size, cmp) != NULL;
@@ -368,7 +368,7 @@ bool da_contains_bsearch(const DArray_t* da, const void* target, int (*cmp)(cons
  *                                                                            *
  ******************************************************************************/
 
-bool da_set(DArray_t* da, size_t idx, const void* e) {
+bool da_set(DArray* da, size_t idx, const void* e) {
     if (!da || idx >= da->capacity || !e) return false;
 
     __da_set_raw(da, idx, e);
@@ -378,7 +378,7 @@ bool da_set(DArray_t* da, size_t idx, const void* e) {
     return true;
 }
 
-bool da_swap(DArray_t* da, size_t i, size_t j) {
+bool da_swap(DArray* da, size_t i, size_t j) {
     if (!da || i >= da->length || j >= da->length) return false;
 
     if (i == j) return true;
@@ -399,7 +399,7 @@ bool da_swap(DArray_t* da, size_t i, size_t j) {
  *                                                                            *
  ******************************************************************************/
 
-bool da_push(DArray_t* da, const void* e) {
+bool da_push(DArray* da, const void* e) {
     if (!da || !e) return false;
     if (!__da_upsize(da)) return false;
 
@@ -409,7 +409,7 @@ bool da_push(DArray_t* da, const void* e) {
     return true;
 }
 
-bool da_push_front(DArray_t* da, const void* e) {
+bool da_push_front(DArray* da, const void* e) {
     if (!da || !e) return false;
     if (!__da_upsize(da)) return false;
 
@@ -421,7 +421,7 @@ bool da_push_front(DArray_t* da, const void* e) {
     return true;
 }
 
-void* da_pop(DArray_t* da) {
+void* da_pop(DArray* da) {
     if (!da || da_is_empty(da)) return NULL;
 
     size_t idx = da->length - 1;
@@ -441,7 +441,7 @@ void* da_pop(DArray_t* da) {
     return elem;
 }
 
-void* da_pop_front(DArray_t* da) {
+void* da_pop_front(DArray* da) {
     if (!da || da_is_empty(da)) return NULL;
 
     void* src = da_index(da, 0);
@@ -462,7 +462,7 @@ void* da_pop_front(DArray_t* da) {
     return elem;
 }
 
-size_t da_remove(DArray_t* da, void* target, int (*cmp)(const void* a, const void* b)) {
+size_t da_remove(DArray* da, void* target, int (*cmp)(const void* a, const void* b)) {
     if (!da || !target || !cmp) return (size_t)-1;
 
     for (size_t i = 0; i < da->length; i++) {
@@ -483,7 +483,7 @@ size_t da_remove(DArray_t* da, void* target, int (*cmp)(const void* a, const voi
     return (size_t)-1;
 }
 
-bool da_insert_at(DArray_t* da, size_t idx, const void* e) {
+bool da_insert_at(DArray* da, size_t idx, const void* e) {
     if (!da || !e || idx > da->length) return false;
 
     if (idx == 0) return da_push_front(da, e);
@@ -499,7 +499,7 @@ bool da_insert_at(DArray_t* da, size_t idx, const void* e) {
     return true;
 }
 
-bool da_remove_at(DArray_t* da, size_t idx) {
+bool da_remove_at(DArray* da, size_t idx) {
     if (!da || idx >= da->length) return false;
 
     if (idx == 0) return da_pop_front(da);
@@ -524,7 +524,7 @@ bool da_remove_at(DArray_t* da, size_t idx) {
  *                                                                            *
  ******************************************************************************/
 
-bool da_truncate(DArray_t* da, size_t new_length) {
+bool da_truncate(DArray* da, size_t new_length) {
     if (!da) return false;
 
     if (new_length >= da->length) {
@@ -543,7 +543,7 @@ bool da_truncate(DArray_t* da, size_t new_length) {
     return true;
 }
 
-bool da_resize(DArray_t* da, size_t capacity) {
+bool da_resize(DArray* da, size_t capacity) {
     if (!da) return false;
 
     if (da->capacity == capacity) return true;
@@ -564,7 +564,7 @@ bool da_resize(DArray_t* da, size_t capacity) {
     return true;
 }
 
-bool da_reserve(DArray_t* da, size_t capacity) {
+bool da_reserve(DArray* da, size_t capacity) {
     if (!da) return false;
 
     if (da->capacity >= capacity) return true;
@@ -572,7 +572,7 @@ bool da_reserve(DArray_t* da, size_t capacity) {
     return da_resize(da, capacity);
 }
 
-bool da_shrink(DArray_t* da) {
+bool da_shrink(DArray* da) {
     if (!da) return false;
 
     return da_resize(da, da->length);
@@ -584,7 +584,7 @@ bool da_shrink(DArray_t* da) {
  *                                                                            *
  ******************************************************************************/
 
-DArray_t* da_concat(const DArray_t* a, const DArray_t* b) {
+DArray* da_concat(const DArray* a, const DArray* b) {
     if (!a) return da_copy(b);
     if (!b) return da_copy(a);
 
@@ -592,7 +592,7 @@ DArray_t* da_concat(const DArray_t* a, const DArray_t* b) {
 
     size_t length = a->length + b->length;
 
-    DArray_t* concatanated = da_new_with_capacity(a->element_size, length);
+    DArray* concatanated = da_new_with_capacity(a->element_size, length);
     if (!concatanated) return NULL;
 
     concatanated->copier = a->copier;
@@ -620,14 +620,14 @@ DArray_t* da_concat(const DArray_t* a, const DArray_t* b) {
     return concatanated;
 }
 
-DArray_t* da_merge_sorted(const DArray_t* a, const DArray_t* b, int (*cmp)(const void* a, const void* b)) {
+DArray* da_merge_sorted(const DArray* a, const DArray* b, int (*cmp)(const void* a, const void* b)) {
     if (!a) return da_copy(b);
     if (!b) return da_copy(a);
     if (!cmp) return NULL;
     if (a->element_size != b->element_size) return NULL;
 
     size_t length = a->length + b->length;
-    DArray_t* merged = da_new_with_capacity(a->element_size, length);
+    DArray* merged = da_new_with_capacity(a->element_size, length);
     if (!merged) return NULL;
 
     merged->copier = a->copier;
@@ -676,20 +676,20 @@ DArray_t* da_merge_sorted(const DArray_t* a, const DArray_t* b, int (*cmp)(const
  *                                                                            *
  ******************************************************************************/
 
-void da_sort(DArray_t* da, int (*cmp)(const void* a, const void* b)) {
+void da_sort(DArray* da, int (*cmp)(const void* a, const void* b)) {
     if (!da || !cmp) return;
 
     qsort(da->arr, da->length, da->element_size, cmp);
 }
 
-void da_reverse(DArray_t* da) {
+void da_reverse(DArray* da) {
     if (!da) return;
 
     size_t idx = da->length - 1;  // last index
     __da_reverse(da->arr, da->element_size, 0, idx);
 }
 
-void da_rotate_left(DArray_t* da, size_t k) {
+void da_rotate_left(DArray* da, size_t k) {
     if (!da) return;
 
     size_t n = da->length;
@@ -705,7 +705,7 @@ void da_rotate_left(DArray_t* da, size_t k) {
     __da_reverse(da->arr, da->element_size, 0, n - 1);
 }
 
-void da_rotate_right(DArray_t* da, size_t k) {
+void da_rotate_right(DArray* da, size_t k) {
     if (!da) return;
 
     size_t n = da->length;
@@ -723,12 +723,12 @@ void da_rotate_right(DArray_t* da, size_t k) {
  *                                                                            *
  ******************************************************************************/
 
-DArray_t* da_map(const DArray_t* da, void (*map_fn)(void* dest, const void* src), const size_t out_element_size) {
+DArray* da_map(const DArray* da, void (*map_fn)(void* dest, const void* src), const size_t out_element_size) {
     if (!da || !map_fn || out_element_size == 0) return NULL;
 
     const size_t n = da->length;
 
-    DArray_t* mapped = da_new_with_capacity(out_element_size, n);
+    DArray* mapped = da_new_with_capacity(out_element_size, n);
     if (!mapped) return NULL;
 
     for (size_t i = 0; i < n; i++) {
@@ -743,10 +743,10 @@ DArray_t* da_map(const DArray_t* da, void (*map_fn)(void* dest, const void* src)
     return mapped;
 }
 
-DArray_t* da_filter(const DArray_t* da, bool (*filter_fn)(const void* elem)) {
+DArray* da_filter(const DArray* da, bool (*filter_fn)(const void* elem)) {
     if (!da || !filter_fn) return NULL;
 
-    DArray_t* filtered = da_new(da->element_size);
+    DArray* filtered = da_new(da->element_size);
     if (!filtered) return NULL;
 
     filtered->copier = da->copier;
@@ -763,7 +763,7 @@ DArray_t* da_filter(const DArray_t* da, bool (*filter_fn)(const void* elem)) {
     return filtered;
 }
 
-void da_reduce(const DArray_t* da, void* acc, void (*reduce_fn)(void* acc, const void* elem)) {
+void da_reduce(const DArray* da, void* acc, void (*reduce_fn)(void* acc, const void* elem)) {
     if (!da || !acc || !reduce_fn) return;
 
     for (size_t i = 0; i < da->length; i++) {
@@ -794,16 +794,16 @@ inline static void __da_default_printer(const void* k) {
     printf("<@%p>", k);
 }
 
-inline static const void* __da_index_raw(const DArray_t* da, size_t idx) {
+inline static const void* __da_index_raw(const DArray* da, size_t idx) {
     return (char*)da->arr + (da->element_size * idx);
 }
 
-inline static void __da_set_raw(DArray_t* da, size_t idx, const void* e) {
+inline static void __da_set_raw(DArray* da, size_t idx, const void* e) {
     void* dest = da_index(da, idx);
     da->copier(dest, e);
 }
 
-inline static bool __da_upsize(DArray_t* da) {
+inline static bool __da_upsize(DArray* da) {
     if (da->length == da->capacity) {
         const size_t new_cap = da->capacity ? (size_t)((double)da->capacity * da->growth_factor) : 1;
         if (!da_reserve(da, new_cap)) return false;
@@ -812,13 +812,13 @@ inline static bool __da_upsize(DArray_t* da) {
     return true;
 }
 
-inline static void __da_downsize(DArray_t* da) {
+inline static void __da_downsize(DArray* da) {
     if (da->length < (size_t)((double)da->capacity * da->shrink_factor)) {
         da_shrink(da);
     }
 }
 
-inline static void __da_shift(DArray_t* da, size_t dest_idx, size_t src_idx) {
+inline static void __da_shift(DArray* da, size_t dest_idx, size_t src_idx) {
     if (!da || dest_idx == src_idx) return;
 
     // Calculate the number of elements to move

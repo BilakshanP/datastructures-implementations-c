@@ -124,7 +124,7 @@ void test_initialization() {
     printf("--- Test Initialization ---\n");
 
     // Test da_new (default capacity 4)
-    DArray_t* da_default = da_new(sizeof(int));
+    DArray* da_default = da_new(sizeof(int));
     assert(da_default != NULL);
     assert(da_length(da_default) == 0);
     assert(da_capacity(da_default) == 4);
@@ -133,7 +133,7 @@ void test_initialization() {
     da_free(da_default);
 
     // Test da_new_with_capacity
-    DArray_t* da_cap = da_new_with_capacity(sizeof(int), 10);
+    DArray* da_cap = da_new_with_capacity(sizeof(int), 10);
     assert(da_cap != NULL);
     assert(da_length(da_cap) == 0);
     assert(da_capacity(da_cap) == 10);
@@ -143,7 +143,7 @@ void test_initialization() {
     // Test da_new_from_array (using int)
     int raw_arr[] = {10, 20, 30};
     size_t len = 3;
-    DArray_t* da_from_arr = da_new_from_array(sizeof(int), len, raw_arr, int_copier);
+    DArray* da_from_arr = da_new_from_array(sizeof(int), len, raw_arr, int_copier);
     assert(da_from_arr != NULL);
     assert(da_length(da_from_arr) == len);
     assert(da_capacity(da_from_arr) == len);
@@ -156,7 +156,7 @@ void test_initialization() {
     Person p_raw[] = {
         {.id = 1, .name = strdup("Alice")},
         {.id = 2, .name = strdup("Bob")}};
-    DArray_t* da_p_raw = da_new_from_array(sizeof(Person), 2, p_raw, person_copier);
+    DArray* da_p_raw = da_new_from_array(sizeof(Person), 2, p_raw, person_copier);
     da_p_raw->copier = person_copier;
     da_p_raw->deallocator = person_deallocator;
     da_p_raw->printer = person_printer;
@@ -179,7 +179,7 @@ void test_copy_and_cleanup() {
     printf("--- Test Copy and Cleanup ---\n");
 
     // Setup: Array with complex elements
-    DArray_t* da = da_new_with_capacity(sizeof(Person), 2);
+    DArray* da = da_new_with_capacity(sizeof(Person), 2);
     da->copier = person_copier;
     da->deallocator = person_deallocator;
     da->printer = person_printer;
@@ -192,7 +192,7 @@ void test_copy_and_cleanup() {
     destroy_person(p2);
 
     // Test da_copy
-    DArray_t* da_copy_ = da_copy(da);
+    DArray* da_copy_ = da_copy(da);
     assert(da_copy_ != NULL);
     assert(da_length(da_copy_) == da_length(da));
     assert(da_capacity(da_copy_) == da_length(da));  // Copy shrinks to length
@@ -225,7 +225,7 @@ void test_copy_and_cleanup() {
 void test_getters() {
     printf("--- Test Getters ---\n");
 
-    DArray_t* da = da_new(sizeof(int));
+    DArray* da = da_new(sizeof(int));
     da->copier = int_copier;
 
     int v1 = 10, v2 = 20;
@@ -239,7 +239,7 @@ void test_getters() {
 
     // Test da_is_empty
     assert(!da_is_empty(da));
-    DArray_t* empty_da = da_new(sizeof(int));
+    DArray* empty_da = da_new(sizeof(int));
     assert(da_is_empty(empty_da));
     assert(da_is_empty(NULL));
     da_free(empty_da);
@@ -255,7 +255,7 @@ void test_getters() {
     printf("da_get, da_get_first, da_get_last passed.\n");
 
     // Test da_get_subarr
-    DArray_t* sub = da_get_subarr(da, 0, 1);  // Should contain {10}
+    DArray* sub = da_get_subarr(da, 0, 1);  // Should contain {10}
     assert(sub != NULL);
     assert(da_length(sub) == 1);
     assert(*(int*)da_get(sub, 0) == 10);
@@ -276,7 +276,7 @@ void test_getters() {
     free(moved_raw_ptr);  // Caller must free
     printf("da_get_raw passed.\n");
 
-    DArray_t* da2 = da_new(sizeof(int));
+    DArray* da2 = da_new(sizeof(int));
     da2->copier = int_copier;
     da_push(da2, &v1);
     // Test da_get_arr (returns a copy)
@@ -293,7 +293,7 @@ void test_getters() {
 
 void test_setters() {
     printf("--- Test Setters ---\n");
-    DArray_t* da = da_new(sizeof(int));
+    DArray* da = da_new(sizeof(int));
     da->copier = int_copier;
     int v1 = 10, v2 = 20, v3 = 30;
 
@@ -329,7 +329,7 @@ void test_setters() {
 
 void test_insertion_deletion() {
     printf("--- Test Insertion & Deletion ---\n");
-    DArray_t* da = da_new(sizeof(int));
+    DArray* da = da_new(sizeof(int));
     da->copier = int_copier;
     int v1 = 10, v2 = 20, v3 = 30, v4 = 40;
 
@@ -383,7 +383,7 @@ void test_insertion_deletion() {
     printf("da_remove_at (middle) passed.\n");
 
     // Test da_remove (with deallocator)
-    DArray_t* da_p = da_new(sizeof(Person));
+    DArray* da_p = da_new(sizeof(Person));
     da_p->copier = person_copier;
     da_p->deallocator = person_deallocator;
     Person pa1 = create_person(1, "A"), pa2 = create_person(2, "B");
@@ -408,7 +408,7 @@ void test_insertion_deletion() {
 
 void test_resizing() {
     printf("--- Test Resizing ---\n");
-    DArray_t* da = da_new_with_capacity(sizeof(int), 10);
+    DArray* da = da_new_with_capacity(sizeof(int), 10);
     da->copier = int_copier;
     int v = 1;
 
@@ -462,7 +462,7 @@ void test_resizing() {
 
 void test_searching() {
     printf("--- Test Searching ---\n");
-    DArray_t* da = da_new(sizeof(int));
+    DArray* da = da_new(sizeof(int));
     da->copier = int_copier;
     da->printer = int_printer;
     int a = 10, b = 20, c = 30, target = 20, not_found = 99;
@@ -497,7 +497,7 @@ void test_searching() {
 
 void test_order_manipulation() {
     printf("--- Test Order Manipulation ---\n");
-    DArray_t* da = da_new(sizeof(int));
+    DArray* da = da_new(sizeof(int));
     da->copier = int_copier;
     int v[] = {30, 10, 40, 20};
     for (size_t i = 0; i < 4; i++) da_push(da, &v[i]);  // {30, 10, 40, 20}
@@ -535,8 +535,8 @@ void test_order_manipulation() {
 
 void test_concatenation() {
     printf("--- Test Concatenation ---\n");
-    DArray_t* a = da_new(sizeof(int));
-    DArray_t* b = da_new(sizeof(int));
+    DArray* a = da_new(sizeof(int));
+    DArray* b = da_new(sizeof(int));
     a->copier = int_copier;
     b->copier = int_copier;
     int v1 = 1, v2 = 2, v3 = 3, v4 = 4;
@@ -546,7 +546,7 @@ void test_concatenation() {
     da_push(b, &v4);  // B: {3, 4}
 
     // Test da_concat
-    DArray_t* c = da_concat(a, b);  // C: {1, 2, 3, 4}
+    DArray* c = da_concat(a, b);  // C: {1, 2, 3, 4}
     assert(da_length(c) == 4);
     assert(*(int*)da_get(c, 0) == 1);
     assert(*(int*)da_get(c, 3) == 4);
@@ -555,7 +555,7 @@ void test_concatenation() {
 
     // Test da_merge_sorted
     // A: {1, 2}, B: {3, 4} are sorted
-    DArray_t* merged = da_merge_sorted(a, b, int_cmp);  // Merged: {1, 2, 3, 4}
+    DArray* merged = da_merge_sorted(a, b, int_cmp);  // Merged: {1, 2, 3, 4}
     assert(da_length(merged) == 4);
     assert(*(int*)da_get(merged, 0) == 1);
     assert(*(int*)da_get(merged, 3) == 4);
@@ -563,7 +563,7 @@ void test_concatenation() {
     da_free(merged);
 
     // Test da_merge_sorted (interleaving)
-    DArray_t* d = da_new(sizeof(int));
+    DArray* d = da_new(sizeof(int));
     d->copier = int_copier;
     int v5 = 5, v6 = 6;
     (void)v6;
@@ -605,13 +605,13 @@ void sum_reduce_fn(void* acc, const void* elem) {
 
 void test_functional_methods() {
     printf("--- Test Functional Methods ---\n");
-    DArray_t* da = da_new(sizeof(int));
+    DArray* da = da_new(sizeof(int));
     da->copier = int_copier;
     int v[] = {5, 10, 15, 20};
     for (size_t i = 0; i < 4; i++) da_push(da, &v[i]);  // {5, 10, 15, 20}
 
     // Test da_map
-    DArray_t* mapped = da_map(da, int_to_wrapper_map_fn, sizeof(Wrapper));
+    DArray* mapped = da_map(da, int_to_wrapper_map_fn, sizeof(Wrapper));
     assert(mapped != NULL);
     assert(da_length(mapped) == 4);
     assert(mapped->element_size == sizeof(Wrapper));
@@ -621,7 +621,7 @@ void test_functional_methods() {
     da_free(mapped);
 
     // Test da_filter
-    DArray_t* filtered = da_filter(da, greater_than_10_filter_fn);
+    DArray* filtered = da_filter(da, greater_than_10_filter_fn);
     assert(filtered != NULL);
     assert(da_length(filtered) == 2);  // {15, 20}
     assert(*(int*)da_get(filtered, 0) == 15);
@@ -643,7 +643,7 @@ void test_functional_methods() {
 void test_default_fns() {
     printf("--- Test Default Functions (SIGTRAP Handling) ---\n");
 
-    DArray_t* da = da_new(sizeof(int));
+    DArray* da = da_new(sizeof(int));
     int v = 10;
 
     // 1. Setup SIGTRAP handler
