@@ -234,6 +234,18 @@ bool da_contains_bsearch(const DArray* da, const void* target, int (*cmp)(const 
 
 /******************************************************************************
  *                                                                            *
+ *                                  Compare                                   *
+ *                                                                            *
+ ******************************************************************************/
+
+/// @brief Checks whether the two arrays are equal ot not.
+/// @param a Pointer to the dynamic array.
+/// @param b Pointer to the dynamic array.
+/// @return `true` if equal, `false` otherwise (including on error).
+bool da_are_eq(const DArray* a, const DArray* b);
+
+/******************************************************************************
+ *                                                                            *
  *                                  Setters                                   *
  *                                                                            *
  ******************************************************************************/

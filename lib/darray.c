@@ -364,6 +364,31 @@ bool da_contains_bsearch(const DArray* da, const void* target, int (*cmp)(const 
 
 /******************************************************************************
  *                                                                            *
+ *                                  Compare                                   *
+ *                                                                            *
+ ******************************************************************************/
+
+bool da_are_eq(const DArray* a, const DArray* b) {
+    if (a == b) return true;
+
+    if (!a) return false;
+    if (!b) return false;
+
+    if (a->element_size != b->element_size) return false;
+    if (a->length != b->length) return false;
+
+    for (int i = 0; i < a->length; i++) {
+        const void* ai = __da_index_raw(a, i);
+        const void* bi = __da_index_raw(b, i);
+
+        if (cmp(ai, bi)) return false;
+    }
+
+    return true;
+}
+
+/******************************************************************************
+ *                                                                            *
  *                                  Setters                                   *
  *                                                                            *
  ******************************************************************************/
