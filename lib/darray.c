@@ -219,12 +219,12 @@ void da_print(const DArray* da) {
 }
 
 void da_fprint(FILE* file, const DArray* da) {
+    if (!file) file = stdout;
+
     if (!da) {
         fprintf(file, "[NULLPTR]");
         return;
     }
-
-    if (!file) file = stdout;
 
     fprintf(file, "[");
 
