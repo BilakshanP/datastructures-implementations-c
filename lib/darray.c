@@ -220,7 +220,7 @@ void da_print(const DArray* da) {
 
 void da_fprint(FILE* file, const DArray* da) {
     if (!da) {
-        printf("[NULLPTR]");
+        fprintf(file, "[NULLPTR]");
         return;
     }
 
