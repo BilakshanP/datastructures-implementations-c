@@ -53,7 +53,7 @@ struct DynamicArray {
      * @details Used by `da_print` and `da_fprint` to provide custom element representation.
      * @param k Pointer to the element to be printed.
      */
-    void (*printer)(const void* k);
+    void (*printer)(FILE* file, const void* k);
 };
 
 /******************************************************************************
@@ -144,9 +144,9 @@ void* da_index(DArray* da, size_t idx);
 void da_print(const DArray* da);
 
 /// @brief Prints the contents of the dynamic array to a specified file stream.
-/// @param da Pointer to the dynamic array.
 /// @param file Pointer to the output stream (e.g., `stdout` or `stderr`). If `file` is `NULL`, it defaults to `stdout`.
-void da_fprint(const DArray* da, FILE* file);
+/// @param da Pointer to the dynamic array.
+void da_fprint(FILE* file, const DArray* da);
 
 /******************************************************************************
  *                                                                            *

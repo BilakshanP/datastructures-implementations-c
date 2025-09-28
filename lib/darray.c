@@ -31,8 +31,9 @@ inline static void __da_default_deallocator(void* k);
 
 /// @brief Default element printer function.
 /// @details Prints the memory address of the element in the format `<@ADDRESS>`.
+/// @param file Pointer to the output stream.
 /// @param k Pointer to the element to be printed.
-inline static void __da_default_printer(const void* k);
+inline static void __da_default_printer(FILE* file, const void* k);
 
 /// @brief Calculates the memory address of the element at a given index.
 /// @details Internal function for raw pointer arithmetic: `(char*)da->arr + (da->element_size * idx)`.
@@ -214,10 +215,10 @@ inline void* da_index(DArray* da, size_t idx) {
  ******************************************************************************/
 
 void da_print(const DArray* da) {
-    da_fprint(da, stdout);
+    da_fprint(stdout, da);
 }
 
-void da_fprint(const DArray* da, FILE* file) {
+void da_fprint(FILE* file, const DArray* da) {
     if (!da) {
         printf("[NULLPTR]");
         return;
@@ -229,7 +230,7 @@ void da_fprint(const DArray* da, FILE* file) {
 
     for (size_t i = 0; i < da->length; i++) {
         const void* elem = __da_index_raw(da, i);
-        da->printer(elem);
+        da->printer(file, elem);
         if (i < da->length - 1) {
             fprintf(file, ", ");
         }
@@ -856,8 +857,8 @@ inline static void __da_default_deallocator(void* k) {
     (void)k;  // suppress unused warning
 }
 
-inline static void __da_default_printer(const void* k) {
-    printf("<@%p>", k);
+inline static void __da_default_printer(FILE* file, const void* k) {
+    fprintf(file, "<@%p>", k);
 }
 
 inline static const void* __da_index_raw(const DArray* da, size_t idx) {
