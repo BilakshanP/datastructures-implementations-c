@@ -1,6 +1,6 @@
 CC = gcc
 OUT = target/main
-FLAGS = -Wpedantic -Wall -Wextra -Wconversion -lm -g -Isrc -Ilib
+FLAGS = -std=c2x -Wpedantic -Wall -Wextra -Wconversion -lm -g -Isrc -Ilib
 
 # All .c files in lib
 LIB_SOURCES := $(shell find lib -name '*.c')
