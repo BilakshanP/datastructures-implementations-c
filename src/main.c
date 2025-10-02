@@ -3,7 +3,7 @@
 
 #include "../lib/darray.h"
 
-void printer(const void* k) {
+void printer(FILE*, const void* k) {
     if (!k) raise(SIGTRAP);
 
     printf("%d", *(int*)k);
@@ -15,8 +15,6 @@ bool even_filter(const void* k) { return (*(int*)k) % 2 == 0; }
 
 int main() {
     DArray* da = da_new(sizeof(int));
-
-    da->growth_factor = 10;
 
     da->copier = copier;
     da->printer = printer;
@@ -38,5 +36,5 @@ int main() {
     da_shrink(filtered);
 
     da_print(filtered);
-    printf("%ld %ld \n", filtered->length, filtered->capacity);
+    printf("\n%ld %ld \n", filtered->length, filtered->capacity);
 }
